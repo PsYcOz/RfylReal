@@ -26,9 +26,15 @@ public class PlatformStructure
 		if (platformType.equals(Enum_Platform.SQUARE))
 			platPy += 53;
 		else if (platformType.equals(Enum_Platform.AIR))
+		{
 			platPy += 34;
+			platPx+=15;
+		}
 		else if (platformType.equals(Enum_Platform.PILLAR))
+		{
 			platPy += 39;
+			platPx+=15;
+		}
 		
 		_platform = new Sprite(platPx, platPy, platformTiledTextureRegion, gpVertexBom);
 		_grass = new Sprite(pX, pY, grassTiledTextureRegion, gpVertexBom);

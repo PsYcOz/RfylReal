@@ -1,24 +1,22 @@
 package com.example.runforyourlife.scene;
 
+import java.util.Random;
+
+import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
-import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.util.color.Color;
-
 import android.hardware.SensorManager;
-import android.view.Gravity;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Manifold;
@@ -33,7 +31,13 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
     // VARIABLES
     //---------------------------------------------
 		//----------Scene
-
+		//time
+		private float						timeSecFloat=0f;
+		private int						timeSec=0;
+		private int						timeMin=0;
+		private int						timeHou=0;
+		//PlatFrom
+		private float						lastPlatformPos=0f;
 		//----------Physics
 		private PhysicsWorld 				mPhysicsWorld;
 		private static final FixtureDef 	FIXTURE_DEF = PhysicsFactory.createFixtureDef(1, 0.0f, 0.0f);
@@ -50,57 +54,52 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 	}
 	private void							createPhysics()
 	{
-		mPhysicsWorld = new FixedStepPhysicsWorld(60, new Vector2(0, 17), false); 
+		mPhysicsWorld =  new PhysicsWorld(new Vector2(0, SensorManager.GRAVITY_JUPITER), false);
 		mPhysicsWorld.setContactListener(contactListener());
 	    registerUpdateHandler(mPhysicsWorld);
 	}
 	@Override
 	public void 							createScene() 
-	{
-		final PlatformStructure 			pfStruct;
-		final Body 							pfBody;
-		final PlatformStructure 			pfStruct2;
-		final Body 							pfBody2;
-		
+	{	
 		createBackground();
 		createPhysics();
 		
 		setOnSceneTouchListener(this);
 		
 		//*********************TESTS
-		pfStruct = new PlatformStructure( 0.0f
-										, 200.0f
-										, resourcesManager.gameTextureRegionPlatformSquare1
-										, resourcesManager.gameTextureRegionPlatformGrassSquare1
-										, vbom
-										, Enum_Platform.SQUARE);
-		pfBody = PhysicsFactory.createBoxBody(mPhysicsWorld, pfStruct.get_platform(), BodyType.StaticBody, FIXTURE_DEF);
+		for(int ji=0;ji<100;ji++)
+			randomPlatform();
 		
-		mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(pfStruct.get_platform(), pfBody, true, true));
-		this.attachChild(pfStruct.get_platform());
-		this.attachChild(pfStruct.get_grass());
+		this.registerUpdateHandler(new IUpdateHandler()
+		{
+
+			@Override
+			public void 					onUpdate(float pSecondsElapsed) 
+			{
+				handleClock(pSecondsElapsed);
+				
+				if( timeSec%2 == 0)
+				{
+					
+				}
+			}
+			@Override
+			public void reset() {}
+		});
 		
-		pfStruct2 = new PlatformStructure( 800.0f
-				, 100.0f
-				, resourcesManager.gameTextureRegionPlatformLittleAir
-				, resourcesManager.gameTextureRegionPlatformGrassLittleAir
-				, vbom
-				, Enum_Platform.AIR);
-		pfBody2 = PhysicsFactory.createBoxBody(mPhysicsWorld, pfStruct2.get_platform(), BodyType.StaticBody, FIXTURE_DEF);
-		
-		mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(pfStruct2.get_platform(), pfBody2, true, true));
-		this.attachChild(pfStruct2.get_platform());
-		this.attachChild(pfStruct2.get_grass());
-		
+		//MainChar
 		mainCharacter = new MainCharacter(50,50, vbom, camera, mPhysicsWorld) 
 		{			
 			@Override
-			public void 					onDie() {
-				// TODO Auto-generated method stub
+			public void 					onDie() 
+			{
 				
 			}
 		};
+		mainCharacter._mcharBody = PhysicsFactory.createBoxBody(this.mPhysicsWorld, mainCharacter, BodyType.DynamicBody, FIXTURE_DEF);
 		this.attachChild(mainCharacter);
+		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(mainCharacter, mainCharacter._mcharBody, true, true));
+		mainCharacter._mcharBody.setFixedRotation(true);
 		
 	}
 	@Override
@@ -147,31 +146,13 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 			@Override
 			public void 					beginContact(Contact contact) 
 			{
-				final Fixture x1 = contact.getFixtureA();
-	            final Fixture x2 = contact.getFixtureB();
-
-	            if (x1.getBody().getUserData() != null && x2.getBody().getUserData() != null)
-	            {
-	                if (x2.getBody().getUserData().equals("player"))
-	                {
-	                	mainCharacter.increaseFootContacts();
-	                }
-	            }
+	             mainCharacter.increaseFootContacts();
 			}
 
 			@Override
 			public void 					endContact(Contact contact) 
 			{
-				final Fixture x1 = contact.getFixtureA();
-	            final Fixture x2 = contact.getFixtureB();
-
-	            if (x1.getBody().getUserData() != null && x2.getBody().getUserData() != null)
-	            {
-	                if (x2.getBody().getUserData().equals("player"))
-	                {
-	                	mainCharacter.decreaseFootContacts();
-	                }
-	            }
+				mainCharacter.decreaseFootContacts();
 			}
 
 			@Override
@@ -190,4 +171,82 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 	    return contactListener;
 	}
 
+	//---------------------------------------------
+    // GAME HANDLER
+    //---------------------------------------------
+	
+	public void							handleClock(float pSecondsElapsed) 
+	{
+		timeSecFloat += pSecondsElapsed;
+		timeSec=(int)timeSecFloat;
+    	
+    	if(timeSec >= 60)
+    	{
+    		timeSecFloat=0f;
+    		timeSec=0;
+    		timeMin++;
+    		
+    		if(timeMin == 60)
+    		{
+    			timeMin=0;
+    			timeHou++;
+    		}
+    	}
+	}
+	
+	public void							randomPlatform()
+	{
+		final PlatformStructure 			pfStruct;
+		final Body 							pfBody;
+		Random 								r;
+		int 								i1;
+		r = new Random();
+    	i1=r.nextInt(4) +1;
+    	
+    	if(i1==1)
+    	{
+    		pfStruct = new PlatformStructure( lastPlatformPos
+					, 200.0f
+					, resourcesManager.gameTextureRegionPlatformSquare1												
+					, resourcesManager.gameTextureRegionPlatformGrassSquare1
+					, vbom
+					, Enum_Platform.SQUARE);
+    		lastPlatformPos+=800.0f;
+    	}
+    	else if(i1==2)
+    	{
+    		pfStruct = new PlatformStructure( lastPlatformPos
+					, 100.0f
+					, resourcesManager.gameTextureRegionPlatformLittleAir
+					, resourcesManager.gameTextureRegionPlatformGrassLittleAir
+					, vbom
+					, Enum_Platform.AIR);
+    		lastPlatformPos+=200.0f;
+    	}
+    	else if(i1==3)
+    	{
+    		pfStruct = new PlatformStructure( lastPlatformPos
+					, 200.0f
+					, resourcesManager.gameTextureRegionPlatformSquare2											
+					, resourcesManager.gameTextureRegionPlatformGrassSquare1
+					, vbom
+					, Enum_Platform.SQUARE);
+    		lastPlatformPos+=800.0f;
+    	}
+    	else
+    	{
+    		pfStruct = new PlatformStructure( lastPlatformPos
+					, 200.0f
+					, resourcesManager.gameTextureRegionPlatformPillar										
+					, resourcesManager.gameTextureRegionPlatformGrassPillar
+					, vbom
+					, Enum_Platform.PILLAR);
+    		lastPlatformPos+=300.0f;
+    	}
+		
+		pfBody = PhysicsFactory.createBoxBody(mPhysicsWorld, pfStruct.get_platform(), BodyType.StaticBody, FIXTURE_DEF);
+		mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(pfStruct.get_platform(), pfBody, true, true));
+		this.attachChild(pfStruct.get_platform());
+		this.attachChild(pfStruct.get_grass());		
+	}
 }

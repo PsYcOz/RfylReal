@@ -28,7 +28,6 @@ public abstract class MainCharacter extends AnimatedSprite
     public MainCharacter(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld)
     {
         super(pX, pY, ResourcesManager.getInstance().gameTiledTextureRegionCharacter, vbo);
-        createPhysics(camera, physicsWorld);
         camera.setChaseEntity(this);
     }
     
@@ -37,42 +36,20 @@ public abstract class MainCharacter extends AnimatedSprite
     // ---------------------------------------------
     public void 									increaseFootContacts()
     {
+    	System.out.println("Gotcha+1");
         footContacts++;
     }
 
     public void 									decreaseFootContacts()
     {
+    	System.out.println("Gotcha-1");
         footContacts--;
     }
-    private void 									createPhysics(final Camera camera, PhysicsWorld physicsWorld)
-    {        
-    	_mcharBody = PhysicsFactory.createBoxBody(physicsWorld, this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
-    	_mcharBody.setUserData("player");
-    	_mcharBody.setFixedRotation(true);
-        
-        physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, _mcharBody, true, false)
-        {
-            @Override
-            public void onUpdate(float pSecondsElapsed)
-            {
-                super.onUpdate(pSecondsElapsed);
-                camera.onUpdate(0.1f);
-                
-                if (getY() <= 0)
-                {                    
-                    onDie();
-                }
-                
-                if (_canRun)
-                {    
-                	_mcharBody.setLinearVelocity(0f, 7f);
-                }
-            }
-        });
-    }
+    
     public void 									setRunning()
     {
         _canRun = true;
+        _mcharBody.setLinearVelocity(10f, 0f);
         this.animate(100);
     }
     public void 									jump()
@@ -80,7 +57,7 @@ public abstract class MainCharacter extends AnimatedSprite
     	if (footContacts < 1)
     		return;
     	
-    	_mcharBody.setLinearVelocity(0f, -60f);
+    	_mcharBody.setLinearVelocity(8f, -14f);
     }
     public abstract void onDie();
 }
