@@ -1,11 +1,15 @@
 package com.example.runforyourlife.scene;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.AutoParallaxBackground;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.ParallaxBackground.ParallaxEntity;
+import org.andengine.entity.sprite.Sprite;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
@@ -36,7 +40,9 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		private int						timeSec=0;
 		private int						timeMin=0;
 		private int						timeHou=0;
+		private int						lastUpdateTimeSec=0;
 		//PlatFrom
+		ArrayList<PlatformStructure> 		platformList;
 		private float						lastPlatformPos=0f;
 		//----------Physics
 		private PhysicsWorld 				mPhysicsWorld;
@@ -50,7 +56,15 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 	//---------------------------------------------
 	private void							createBackground()
 	{
-		setBackground(new Background(Color.BLACK));
+		int CAMERA_HEIGHT = 480;
+		
+		final AutoParallaxBackground autoParallaxBackground = new AutoParallaxBackground(0, 0, 0, 5);
+		autoParallaxBackground.attachParallaxEntity(new ParallaxEntity(0.0f
+																		, new Sprite(0
+																						, CAMERA_HEIGHT - resourcesManager.gameTextureRegionBackground.getHeight()
+																						, resourcesManager.gameTextureRegionBackground
+																						, vbom)));
+		setBackground(autoParallaxBackground);
 	}
 	private void							createPhysics()
 	{
@@ -66,27 +80,9 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		
 		setOnSceneTouchListener(this);
 		
+		platformList=new ArrayList<PlatformStructure>();
+		
 		//*********************TESTS
-		for(int ji=0;ji<100;ji++)
-			randomPlatform();
-		
-		this.registerUpdateHandler(new IUpdateHandler()
-		{
-
-			@Override
-			public void 					onUpdate(float pSecondsElapsed) 
-			{
-				handleClock(pSecondsElapsed);
-				
-				if( timeSec%2 == 0)
-				{
-					
-				}
-			}
-			@Override
-			public void reset() {}
-		});
-		
 		//MainChar
 		mainCharacter = new MainCharacter(50,50, vbom, camera, mPhysicsWorld) 
 		{			
@@ -100,6 +96,37 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		this.attachChild(mainCharacter);
 		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(mainCharacter, mainCharacter._mcharBody, true, true));
 		mainCharacter._mcharBody.setFixedRotation(true);
+		randomPlatform();
+		//Platfrom&&Mainloop
+		this.registerUpdateHandler(new IUpdateHandler()
+		{
+
+			@Override
+			public void 					onUpdate(float pSecondsElapsed) 
+			{	
+				handleClock(pSecondsElapsed);
+				
+				if(timeSec != lastUpdateTimeSec)
+				{
+					System.out.println(timeHou+":"+timeMin+":"+timeSec);
+					lastUpdateTimeSec=timeSec;
+				}
+				
+				if( needNewPlatform())
+				{
+					lastUpdateTimeSec = timeSec;
+					randomPlatform();
+				}
+				
+				while(existPlatformToErase())
+				{
+					deletePlatform();
+				}
+			}
+			@Override
+			public void reset() {}
+		});
+		
 		
 	}
 	@Override
@@ -200,13 +227,15 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		final Body 							pfBody;
 		Random 								r;
 		int 								i1;
+		float								decreaseYpos;
 		r = new Random();
     	i1=r.nextInt(4) +1;
+    	decreaseYpos = (float)r.nextInt(150) +1;
     	
     	if(i1==1)
     	{
     		pfStruct = new PlatformStructure( lastPlatformPos
-					, 200.0f
+					, 200.0f - decreaseYpos
 					, resourcesManager.gameTextureRegionPlatformSquare1												
 					, resourcesManager.gameTextureRegionPlatformGrassSquare1
 					, vbom
@@ -216,7 +245,7 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
     	else if(i1==2)
     	{
     		pfStruct = new PlatformStructure( lastPlatformPos
-					, 100.0f
+					, 200.0f - decreaseYpos
 					, resourcesManager.gameTextureRegionPlatformLittleAir
 					, resourcesManager.gameTextureRegionPlatformGrassLittleAir
 					, vbom
@@ -226,7 +255,7 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
     	else if(i1==3)
     	{
     		pfStruct = new PlatformStructure( lastPlatformPos
-					, 200.0f
+					, 200.0f - decreaseYpos
 					, resourcesManager.gameTextureRegionPlatformSquare2											
 					, resourcesManager.gameTextureRegionPlatformGrassSquare1
 					, vbom
@@ -236,17 +265,34 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
     	else
     	{
     		pfStruct = new PlatformStructure( lastPlatformPos
-					, 200.0f
+					, 200.0f - decreaseYpos
 					, resourcesManager.gameTextureRegionPlatformPillar										
 					, resourcesManager.gameTextureRegionPlatformGrassPillar
 					, vbom
 					, Enum_Platform.PILLAR);
     		lastPlatformPos+=300.0f;
     	}
-		
+    	
 		pfBody = PhysicsFactory.createBoxBody(mPhysicsWorld, pfStruct.get_platform(), BodyType.StaticBody, FIXTURE_DEF);
 		mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(pfStruct.get_platform(), pfBody, true, true));
 		this.attachChild(pfStruct.get_platform());
-		this.attachChild(pfStruct.get_grass());		
+		this.attachChild(pfStruct.get_grass());
+		platformList.add(pfStruct);
+	}
+	boolean									needNewPlatform()
+	{
+		return platformList.get(platformList.size()-1).get_platform().getX() < this.getChildByIndex(0).getX()+1600;
+	}
+	boolean									existPlatformToErase()
+	{
+		return platformList.get(0).get_platform().getX() < this.getChildByIndex(0).getX()-1600;
+	}
+	void									deletePlatform()
+	{
+		platformList.get(0).get_platform().detachSelf();
+		platformList.get(0).get_platform().dispose();
+		platformList.get(0).get_grass().detachSelf();
+		platformList.get(0).get_grass().dispose();
+		platformList.remove(0);
 	}
 }

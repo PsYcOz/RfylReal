@@ -36,13 +36,11 @@ public abstract class MainCharacter extends AnimatedSprite
     // ---------------------------------------------
     public void 									increaseFootContacts()
     {
-    	System.out.println("Gotcha+1");
         footContacts++;
     }
 
     public void 									decreaseFootContacts()
     {
-    	System.out.println("Gotcha-1");
         footContacts--;
     }
     
@@ -57,7 +55,7 @@ public abstract class MainCharacter extends AnimatedSprite
     	if (footContacts < 1)
     		return;
     	
-    	_mcharBody.setLinearVelocity(8f, -14f);
+    	_mcharBody.setLinearVelocity(8f, -13.5f);
     }
     public abstract void onDie();
 }

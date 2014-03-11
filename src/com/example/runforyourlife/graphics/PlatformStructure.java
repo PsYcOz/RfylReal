@@ -37,9 +37,12 @@ public class PlatformStructure
 		}
 		
 		_platform = new Sprite(platPx, platPy, platformTiledTextureRegion, gpVertexBom);
+		
+		//if(_platform.getX() < _platform.getParent().getChildByIndex(0).getX()-800)
+
 		_grass = new Sprite(pX, pY, grassTiledTextureRegion, gpVertexBom);
 	}
-
+	
 	public Sprite 							get_platform() 
 	{
 		return _platform;

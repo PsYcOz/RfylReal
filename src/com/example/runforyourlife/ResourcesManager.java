@@ -48,6 +48,8 @@ public class ResourcesManager
     		//Platform
 	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasSquarePlatform;
 	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasOthersPlatform;
+	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasBackground;
+	    	
 	    	public ITextureRegion 					gameTextureRegionPlatformGrassSquare1;
 	    	public ITextureRegion 					gameTextureRegionPlatformSquare1;
 	    	public ITextureRegion 					gameTextureRegionPlatformGrassSquare2;
@@ -56,6 +58,7 @@ public class ResourcesManager
 	    	public ITextureRegion 					gameTextureRegionPlatformPillar;
 	    	public ITextureRegion 					gameTextureRegionPlatformGrassLittleAir;
 	    	public ITextureRegion 					gameTextureRegionPlatformLittleAir;
+	    	public ITextureRegion 					gameTextureRegionBackground;
 	    	//MainChar
 	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasCharacter;
 	    	public ITiledTextureRegion 				gameTiledTextureRegionCharacter;
@@ -152,6 +155,7 @@ public class ResourcesManager
         //PLATFORMS
     	gameTextureAtlasSquarePlatform = new BuildableBitmapTextureAtlas(activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
     	gameTextureAtlasOthersPlatform = new BuildableBitmapTextureAtlas(activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
+    	gameTextureAtlasBackground = new BuildableBitmapTextureAtlas(activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
     	
     	gameTextureRegionPlatformGrassSquare1 = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlasSquarePlatform, activity, "GrassBig01.png");
     	gameTextureRegionPlatformSquare1 = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlasSquarePlatform, activity, "PlatFormBig01.png");
@@ -163,6 +167,8 @@ public class ResourcesManager
     	gameTextureRegionPlatformGrassLittleAir = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlasOthersPlatform, activity, "GrassPillar.png");
     	gameTextureRegionPlatformLittleAir = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlasOthersPlatform, activity, "PlatFormLittleAir.png");
     	
+    	gameTextureRegionBackground = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlasOthersPlatform, activity, "Landscape.png");
+    	
     	//MainChar
     	gameTextureAtlasCharacter = new BuildableBitmapTextureAtlas(activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
     	gameTiledTextureRegionCharacter = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlasCharacter, activity, "gurlz.png", 6, 1);
@@ -171,8 +177,13 @@ public class ResourcesManager
         {
             this.gameTextureAtlasSquarePlatform.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
             this.gameTextureAtlasSquarePlatform.load();
+            
             this.gameTextureAtlasOthersPlatform.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
             this.gameTextureAtlasOthersPlatform.load();
+            
+            this.gameTextureAtlasBackground.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+            this.gameTextureAtlasBackground.load();
+            
             this.gameTextureAtlasCharacter.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
             this.gameTextureAtlasCharacter.load();
         } 
