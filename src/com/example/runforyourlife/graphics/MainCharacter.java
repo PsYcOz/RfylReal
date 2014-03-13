@@ -21,6 +21,7 @@ public abstract class MainCharacter extends AnimatedSprite
 	public Body 									_mcharBody;
 	private boolean 								_canRun = false;
 	private int 									footContacts = 0;
+	private float									increase = 0.0f;
 	// ---------------------------------------------
     // CONSTRUCTOR
     // ---------------------------------------------
@@ -47,15 +48,19 @@ public abstract class MainCharacter extends AnimatedSprite
     public void 									setRunning()
     {
         _canRun = true;
-        _mcharBody.setLinearVelocity(10f, 0f);
+        _mcharBody.setLinearVelocity(7.5f+increase, 0f);
         this.animate(100);
+    }
+    public void									increaseSpeed()
+    {
+    	increase+=0.5;
     }
     public void 									jump()
     {
     	if (footContacts < 1)
     		return;
     	
-    	_mcharBody.setLinearVelocity(8f, -13.5f);
+    	_mcharBody.setLinearVelocity(8f+increase, -13.5f);
     }
     public abstract void onDie();
 }

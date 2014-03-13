@@ -32,7 +32,7 @@ public class ResourcesManager
     public GameActivity 						activity;
     public Camera 								camera;
     public VertexBufferObjectManager 			vbom;
-    
+
       	//SPLASHSCREEN//
     	public ITextureRegion 					splash_region;
     	private BitmapTextureAtlas 				splashTextureAtlas;

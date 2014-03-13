@@ -24,7 +24,7 @@ public class PlatformStructure
 		platPy = pY;
 		
 		if (platformType.equals(Enum_Platform.SQUARE))
-			platPy += 53;
+			platPy += 50;
 		else if (platformType.equals(Enum_Platform.AIR))
 		{
 			platPy += 34;
@@ -37,9 +37,6 @@ public class PlatformStructure
 		}
 		
 		_platform = new Sprite(platPx, platPy, platformTiledTextureRegion, gpVertexBom);
-		
-		//if(_platform.getX() < _platform.getParent().getChildByIndex(0).getX()-800)
-
 		_grass = new Sprite(pX, pY, grassTiledTextureRegion, gpVertexBom);
 	}
 	
