@@ -1,5 +1,9 @@
 package com.example.runforyourlife;
 
+import java.io.IOException;
+
+import org.andengine.audio.music.Music;
+import org.andengine.audio.music.MusicFactory;
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.opengl.font.Font;
@@ -36,6 +40,7 @@ public class ResourcesManager
       	//SPLASHSCREEN//
     	public ITextureRegion 					splash_region;
     	private BitmapTextureAtlas 				splashTextureAtlas;
+    	
     	//MENU//
     	private BuildableBitmapTextureAtlas 	menuTextureAtlas;
     	public ITextureRegion 					menu_background_region;
@@ -44,24 +49,38 @@ public class ResourcesManager
     	public ITextureRegion 					options_region;
     	
     	public Font 							font;
+    	
     	//GAME//
-    		//Platform
-	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasSquarePlatform;
-	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasOthersPlatform;
-	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasBackground;
+    	
+    	//Obstacle Gfx
+	   	private BuildableBitmapTextureAtlas 	gameTextureAtlasObstacle;
+	   	
+	   	public ITiledTextureRegion 				gameTextureRegionGrave;
+	   	public ITiledTextureRegion 				gameTextureRegionMovingobs;
+	   	public ITiledTextureRegion 				gameTextureRegionFlyinggobs;
+	   	
+    	//Platform Gfx
+	   	private BuildableBitmapTextureAtlas 	gameTextureAtlasSquarePlatform;
+	   	private BuildableBitmapTextureAtlas 	gameTextureAtlasOthersPlatform;
+	   	private BuildableBitmapTextureAtlas 	gameTextureAtlasBackground;
+
 	    	
-	    	public ITextureRegion 					gameTextureRegionPlatformGrassSquare1;
-	    	public ITextureRegion 					gameTextureRegionPlatformSquare1;
-	    	public ITextureRegion 					gameTextureRegionPlatformGrassSquare2;
-	    	public ITextureRegion 					gameTextureRegionPlatformSquare2;
-	    	public ITextureRegion 					gameTextureRegionPlatformGrassPillar;
-	    	public ITextureRegion 					gameTextureRegionPlatformPillar;
-	    	public ITextureRegion 					gameTextureRegionPlatformGrassLittleAir;
-	    	public ITextureRegion 					gameTextureRegionPlatformLittleAir;
-	    	public ITextureRegion 					gameTextureRegionBackground;
-	    	//MainChar
-	    	private BuildableBitmapTextureAtlas 	gameTextureAtlasCharacter;
-	    	public ITiledTextureRegion 				gameTiledTextureRegionCharacter;
+	   	public ITextureRegion 					gameTextureRegionPlatformGrassSquare1;
+	   	public ITextureRegion 					gameTextureRegionPlatformSquare1;
+	   	public ITextureRegion 					gameTextureRegionPlatformGrassSquare2;
+	   	public ITextureRegion 					gameTextureRegionPlatformSquare2;
+	   	public ITextureRegion 					gameTextureRegionPlatformGrassPillar;
+	   	public ITextureRegion 					gameTextureRegionPlatformPillar;
+	   	public ITextureRegion 					gameTextureRegionPlatformGrassLittleAir;
+	   	public ITextureRegion 					gameTextureRegionPlatformLittleAir;
+	   	public ITextureRegion 					gameTextureRegionBackground;
+	   	
+	   	//MainChar Gfx
+	   	private BuildableBitmapTextureAtlas 	gameTextureAtlasCharacter;
+	   	public ITiledTextureRegion 				gameTiledTextureRegionCharacter;
+	   	
+	   	//Sound
+	   	public Music							 mGameTheme;
     //---------------------------------------------
     // METHODS
     //---------------------------------------------
@@ -169,22 +188,32 @@ public class ResourcesManager
     	
     	gameTextureRegionBackground = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlasOthersPlatform, activity, "Landscape.png");
     	
+    	//Obstacles
+    	gameTextureAtlasObstacle = new BuildableBitmapTextureAtlas(activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
+    	gameTextureRegionGrave = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlasObstacle, activity, "Grave.png", 4, 1);
+    	gameTextureRegionMovingobs = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlasObstacle, activity, "What.png", 3, 1);
+    	gameTextureRegionFlyinggobs = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlasObstacle, activity, "Flying.png", 5, 1);
+    	
     	//MainChar
     	gameTextureAtlasCharacter = new BuildableBitmapTextureAtlas(activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
     	gameTiledTextureRegionCharacter = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(gameTextureAtlasCharacter, activity, "gurlz.png", 6, 1);
     	
     	try 
         {
-            this.gameTextureAtlasSquarePlatform.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+            this.gameTextureAtlasSquarePlatform.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
             this.gameTextureAtlasSquarePlatform.load();
             
-            this.gameTextureAtlasOthersPlatform.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+            this.gameTextureAtlasOthersPlatform.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
             this.gameTextureAtlasOthersPlatform.load();
             
-            this.gameTextureAtlasBackground.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+            this.gameTextureAtlasBackground.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
             this.gameTextureAtlasBackground.load();
             
-            this.gameTextureAtlasCharacter.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+            this.gameTextureAtlasObstacle.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
+            this.gameTextureAtlasObstacle.load();
+            
+            
+            this.gameTextureAtlasCharacter.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
             this.gameTextureAtlasCharacter.load();
         } 
         catch (final TextureAtlasBuilderException e)
@@ -200,7 +229,14 @@ public class ResourcesManager
     
     private void 								loadGameAudio()
     {
-        
+    	MusicFactory.setAssetBasePath("mfx/");
+    	
+    	try 
+    	{
+    		this.mGameTheme = MusicFactory.createMusicFromAsset(engine.getMusicManager(), activity, "gameTheme01.mp3");
+    	} catch (final IOException e) {
+			Debug.e(e);
+		}
     }
     public void 								unloadGameTextures()
     {

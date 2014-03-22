@@ -27,6 +27,11 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.example.runforyourlife.graphics.Enum_Platform;
 import com.example.runforyourlife.graphics.MainCharacter;
 import com.example.runforyourlife.graphics.PlatformStructure;
+import com.example.runforyourlife.obstacle.Enum_ObsType;
+import com.example.runforyourlife.obstacle.Flyingobs;
+import com.example.runforyourlife.obstacle.StaticObs;
+import com.example.runforyourlife.obstacle.Movingobs;
+import com.example.runforyourlife.obstacle.Obstacle;
 import com.example.runforyourlife.scene.SceneManager.SceneType;
 
 public class GameScene extends BaseScene implements IOnSceneTouchListener 
@@ -37,15 +42,18 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		//----------Scene
 		//time
 		private float						timeSecFloat=0f;
-		private int						timeSec=0;
-		private int						timeMin=0;
-		private int						timeHou=0;
-		private int						lastUpdateTimeSec=0;
-		//PlatFrom
+		private int							timeSec=0;
+		private int							timeMin=0;
+		private int							timeHou=0;
+		private int							lastUpdateTimeSec=0;
+		//----------/PlatFrom
 		ArrayList<PlatformStructure> 		platformList;
-		private float						lastPlatformPos=0f;
+		private float						lastPlatformPosX=0f;
+		private float						lastPlatformPosY=200f;
 		boolean								firstCall = true;
 		int									addDistance = 0;
+		//----------Obstacles
+		ArrayList<Obstacle> 				obstacleList;
 		//----------Physics
 		private PhysicsWorld 				mPhysicsWorld;
 		private static final FixtureDef 	FIXTURE_DEF = PhysicsFactory.createFixtureDef(1, 0.0f, 0.0f);
@@ -82,7 +90,10 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		
 		setOnSceneTouchListener(this);
 		
+		resourcesManager.mGameTheme.play();
+		
 		platformList=new ArrayList<PlatformStructure>();
+		obstacleList = new ArrayList<Obstacle>();
 		
 		//*********************TESTS
 		//MainChar
@@ -135,6 +146,7 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 	@Override
 	public void 							onBackKeyPressed() 
 	{
+		resourcesManager.mGameTheme.stop();
 		SceneManager.getInstance().loadMenuScene(engine);
 	}
 
@@ -273,7 +285,7 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		platformList.remove(0);
 	}
 	
-	public void							randomPlatform()
+	public void								randomPlatform()
 	{
 		PlatformStructure 						pfStruct;
 		Body 									pfBody;
@@ -283,70 +295,93 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 		int										numPattern;
 		Random 									r;
 		int 									i1 = 0;
-		
+
 		r = new Random();
 		numPattern = rouletteWheel();
 		dplatformList = getPattern(numPattern);
 		
+		System.out.println("I VAUT : "+ yRdm + "\n");
+		
 		for(int i=0; i < dplatformList.size();i++)
 		{
+			i1 = r.nextInt(2);
+			
+			if(i1 == 0)
+				yRdm = - (int)r.nextInt(100)+30;
+			else
+				yRdm = (int)r.nextInt(100)+30;
 			
 			if(firstCall == false)
 			{
 				i1 = r.nextInt(210)+ 80 + addDistance;
-				
 				xRdm = (float)i1;
-				lastPlatformPos += xRdm;
+				lastPlatformPosX += xRdm;
 				
-				i1 = r.nextInt(100);
-				
-				if(i1>0 && i1<50 && xRdm > 170)
-					i1 = -i1;
-				
-				yRdm = i1;
+				if(dplatformList.get(i) == 1 || dplatformList.get(i) == 2)
+				{
+					if(lastPlatformPosY + yRdm < 230 )
+						lastPlatformPosY = 230;
+					else
+						lastPlatformPosY += yRdm;
+				}
+				else if (dplatformList.get(i) == 3)
+				{
+					if(lastPlatformPosY + yRdm < 100 )
+						lastPlatformPosY = 100;
+					else
+						lastPlatformPosY += yRdm;
+				}
+				else if (dplatformList.get(i) == 4)
+				{
+					if(lastPlatformPosY + yRdm < 148 )
+						lastPlatformPosY = 148;
+					else
+						lastPlatformPosY += yRdm;
+				}
+
 			}
 			else
 				firstCall = false;
 			
 			if(dplatformList.get(i) == 1)
 			{
-				pfStruct = new PlatformStructure( lastPlatformPos
-													, 200.0f + yRdm
+				pfStruct = new PlatformStructure( lastPlatformPosX
+													, lastPlatformPosY
 													, resourcesManager.gameTextureRegionPlatformSquare1												
 													, resourcesManager.gameTextureRegionPlatformGrassSquare1
 													, vbom
 													, Enum_Platform.SQUARE);
-				lastPlatformPos+=690.0f;
+				lastPlatformPosX+=690.0f;
 			}
 			else if(dplatformList.get(i) == 2)
 			{
-				pfStruct = new PlatformStructure( lastPlatformPos
-													, 200.0f  + yRdm
+				pfStruct = new PlatformStructure( lastPlatformPosX
+													, lastPlatformPosY
 													,resourcesManager.gameTextureRegionPlatformSquare2											
 													, resourcesManager.gameTextureRegionPlatformGrassSquare1
 													, vbom
 													, Enum_Platform.SQUARE);
-				lastPlatformPos+=690.0f;
+				lastPlatformPosX+=690.0f;
 			}
 			else if(dplatformList.get(i) == 3)
 			{
-				pfStruct = new PlatformStructure( lastPlatformPos
-													, 200.0f + yRdm
+				pfStruct = new PlatformStructure( lastPlatformPosX
+													, lastPlatformPosY
 													, resourcesManager.gameTextureRegionPlatformLittleAir
 													, resourcesManager.gameTextureRegionPlatformGrassLittleAir
 													, vbom
 													, Enum_Platform.AIR);
-				lastPlatformPos+=190.0f;
+				lastPlatformPosX+=190.0f;
 			}
 			else
 			{
-				pfStruct = new PlatformStructure( lastPlatformPos
-													, 200.0f + yRdm
+				pfStruct = new PlatformStructure( lastPlatformPosX
+													, lastPlatformPosY
 													,resourcesManager.gameTextureRegionPlatformPillar										
 													, resourcesManager.gameTextureRegionPlatformGrassPillar
 													, vbom
 													, Enum_Platform.PILLAR);
-				lastPlatformPos+=185.0f;
+				lastPlatformPosX+=185.0f;
 			}
 			
 			pfBody = PhysicsFactory.createBoxBody(mPhysicsWorld, pfStruct.get_platform(), BodyType.StaticBody, FIXTURE_DEF);
@@ -354,6 +389,9 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 			this.attachChild(pfStruct.get_platform());
 			this.attachChild(pfStruct.get_grass());
 			platformList.add(pfStruct);
+			
+			if(r.nextInt(2) == 0)
+				randomObstacle(pfStruct);
 		}
 	}
 	
@@ -463,5 +501,64 @@ public class GameScene extends BaseScene implements IOnSceneTouchListener
 			patternTab.add(4);
 		}
 		return patternTab;
+	}
+	
+	//---------------------------------------------
+    // OBSTACLE HANDLER
+    //---------------------------------------------
+	
+	void									randomObstacle(PlatformStructure ps)
+	{
+		final Obstacle						obs;
+		Random								r;
+		int									rdmRes;
+		boolean								flyOk;
+		
+		flyOk = true;
+		r = new Random();
+		
+		rdmRes = r.nextInt(3);
+		
+		if(rdmRes == 0)
+		{
+			rdmRes = r.nextInt( (int)(ps.get_platform().getWidth() - resourcesManager.gameTextureRegionGrave.getWidth()) );
+		
+			obs = new StaticObs(ps.get_platform().getX() + (float)rdmRes
+							, ps.get_platform().getY() - resourcesManager.gameTextureRegionGrave.getHeight()
+							, resourcesManager.gameTextureRegionGrave
+							, vbom);
+		}
+		else if (rdmRes == 1)
+		{
+			obs = new Movingobs(ps.get_platform().getX()
+							, ps.get_platform().getY() - resourcesManager.gameTextureRegionMovingobs.getHeight()
+							, resourcesManager.gameTextureRegionMovingobs
+							, vbom
+							,ps.get_platform().getX() + ps.get_platform().getWidth());
+		}
+		else
+		{
+			for(int flyi=0; flyi < obstacleList.size(); flyi++)
+			{
+				if(obstacleList.get(flyi).getObsType() == Enum_ObsType.FlyingObs)
+				{
+					flyOk = false;
+					break;
+				}
+			}
+			if(flyOk)
+				obs = new Flyingobs(ps.get_platform().getX(), mainCharacter.getY() - 100, resourcesManager.gameTextureRegionFlyinggobs, vbom);
+			else
+			{
+				obs = new Movingobs(ps.get_platform().getX()
+						, ps.get_platform().getY() - resourcesManager.gameTextureRegionMovingobs.getHeight()
+						, resourcesManager.gameTextureRegionMovingobs
+						, vbom
+						,ps.get_platform().getX() + ps.get_platform().getWidth());
+			}
+		}
+		obstacleList.add(obs);
+		this.attachChild(obs);
+		
 	}
 }
